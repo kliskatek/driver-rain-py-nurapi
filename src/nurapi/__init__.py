@@ -162,21 +162,23 @@ class NUR:
         c_byte_count = ctypes.c_int(byte_count)
         c_data = ctypes.create_string_buffer(byte_count)
         res = NurApiBindings.ReadTagByEPC(self._h_api, c_passwd, c_secured, c_epc_buffer, c_epc_buffer_len,
-                                                c_bank, c_address, c_byte_count, c_data)
-        if res==0:
+                                          c_bank, c_address, c_byte_count, c_data)
+        if res == 0:
             data.clear()
             data += c_data.value
             logger.debug('Data: 0x' + data.hex())
         return NUR._log_op_result(op_name='ReadTagByEPC', c_res=res)
 
-    #
-    # NurApiReadTagByEPC(HANDLE
-    # hApi, DWORD
-    # passwd, BOOL
-    # secured,
-    # BYTE * epcBuffer, DWORD
-    # epcBufferLen,
-    # BYTE
-    # rdBank, DWORD
-    # rdAddress, int
-    # rdByteCount, BYTE * rdBuffer);
+    def WriteTagByEPC(self, passwd: int, secured: bool, epc: bytearray, bank: NurBank,
+                      address: int, byte_count: int, data: bytearray):
+        c_passwd = ctypes.c_ulong(passwd)
+        c_secured = ctypes.c_bool(secured)
+        c_epc_buffer = ctypes.create_string_buffer(init=bytes(epc), size=len(epc))
+        c_epc_buffer_len = ctypes.c_ulong(len(epc))
+        c_bank = ctypes.c_byte(bank.value)
+        c_address = ctypes.c_ulong(address)
+        c_byte_count = ctypes.c_int(byte_count)
+        c_data = ctypes.create_string_buffer(init=bytes(data), size=len(data))
+        res = NurApiBindings.WriteTagByEPC(self._h_api, c_passwd, c_secured, c_epc_buffer, c_epc_buffer_len,
+                                           c_bank, c_address, c_byte_count, c_data)
+        return NUR._log_op_result(op_name='WriteTagByEPC', c_res=res)

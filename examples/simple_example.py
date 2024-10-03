@@ -106,6 +106,12 @@ reader.StopInventoryStream()
 ## READ WRITE OPERATIONS
 if some_epc is not None:
     data = bytearray()
+    reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x12, 0x34]))
+    reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
+    reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x56, 0x78]))
     reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
                         bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
 

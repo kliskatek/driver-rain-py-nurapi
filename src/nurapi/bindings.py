@@ -98,4 +98,11 @@ class NurApiBindings:
                                ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
     ReadTagByEPC.restype = ctypes.c_int
 
+    WriteTagByEPC = _nurapi_dll.NurApiWriteTagByEPC
+    WriteTagByEPC.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_bool, ctypes.c_char_p,
+                               ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
+    WriteTagByEPC.restype = ctypes.c_int
+
+
+
 
