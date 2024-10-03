@@ -126,11 +126,11 @@ class _C_NUR_MODULESETUP(ctypes.Structure):
             self.from_py_type(py_object=py_object)
 
     def from_py_type(self, py_object):
-        if issubclass(type(py_object.link_freq), Enum):
+        if isinstance(py_object.link_freq, SETUP_LINK_FREQ):
             self.linkFreq = py_object.link_freq.value
         else:
             self.linkFreq = py_object.link_freq
-        if issubclass(type(py_object.rx_decoding), Enum):
+        if isinstance(py_object.rx_decoding, SETUP_RX_DEC):
             self.rxDecoding = py_object.rx_decoding.value
         else:
             self.rxDecoding = py_object.rx_decoding
