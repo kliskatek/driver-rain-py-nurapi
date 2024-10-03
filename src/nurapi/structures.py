@@ -1,6 +1,7 @@
 import ctypes
 import struct
 from dataclasses import dataclass
+from enum import Enum
 from typing import List
 
 from dataclasses_json import dataclass_json
@@ -125,11 +126,11 @@ class _C_NUR_MODULESETUP(ctypes.Structure):
             self.from_py_type(py_object=py_object)
 
     def from_py_type(self, py_object):
-        if type(py_object.link_freq) is SETUP_LINK_FREQ:
+        if issubclass(type(py_object.link_freq), Enum):
             self.linkFreq = py_object.link_freq.value
         else:
             self.linkFreq = py_object.link_freq
-        if type(py_object.rx_decoding) is SETUP_RX_DEC:
+        if issubclass(type(py_object.rx_decoding), Enum):
             self.rxDecoding = py_object.rx_decoding.value
         else:
             self.rxDecoding = py_object.rx_decoding
