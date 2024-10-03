@@ -2,14 +2,14 @@ import logging
 import time
 
 # To use from source
-from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-    NurReaderInfo, NurDeviceCaps
-from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
+#from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+#    NurReaderInfo, NurDeviceCaps
+#from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
 # To use from installed package
-#from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-#    NurReaderInfo, NurDeviceCaps
-#from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ
+from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+    NurReaderInfo, NurDeviceCaps
+from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
 logging.basicConfig(level=logging.DEBUG)
 
