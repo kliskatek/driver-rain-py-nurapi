@@ -2,14 +2,14 @@ import logging
 import time
 
 # To use from source
-# from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-#     NurReaderInfo, NurDeviceCaps
-# from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ
+from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+    NurReaderInfo, NurDeviceCaps
+from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
 # To use from installed package
-from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-    NurReaderInfo, NurDeviceCaps
-from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ
+#from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+#    NurReaderInfo, NurDeviceCaps
+#from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -76,7 +76,9 @@ reader.ClearTags()
 
 ## INVENTORY STREAM
 # Define callback
+some_epc: bytearray | None = None
 def callback(inventory_stream_data):
+    global some_epc
     # If stream stopped, restart
     if inventory_stream_data.stopped:
         reader.StartInventoryStream(rounds=10, q=0, session=0)
@@ -88,6 +90,7 @@ def callback(inventory_stream_data):
     for idx in range(tag_count.count):
         tag_data = NurTagData()
         reader.GetTagData(idx=idx, tag_data=tag_data)
+        some_epc = tag_data.epc
     reader.ClearTags()
 
 
@@ -99,6 +102,12 @@ reader.StartInventoryStream(rounds=10, q=0, session=0)
 time.sleep(1)
 # Stop inventory stream
 reader.StopInventoryStream()
+
+## READ WRITE OPERATIONS
+if some_epc is not None:
+    data = bytearray()
+    reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
 
 # Disconnect reader
 reader.Disconnect()

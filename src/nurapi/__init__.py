@@ -1,13 +1,12 @@
 import ctypes
-import inspect
 import logging
 from typing import List
 
 from _ctypes import byref
-from rain_readers.nur import NUR_MODULESETUP
 
 from .bindings import NurApiBindings
-from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult
+from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank
+from .helpers import create_c_byte_buffer
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
     NurReaderInfo, NurDeviceCaps, _C_NUR_DEVICECAPS
@@ -151,3 +150,33 @@ class NUR:
         device_caps.from_Ctype(c_object=c_device_caps)
         logger.debug(device_caps)
         return NUR._log_op_result(op_name='GetDeviceCaps', c_res=res)
+
+    def ReadTagByEPC(self, passwd: int, secured: bool, epc: bytearray, bank: NurBank,
+                     address: int, byte_count: int, data: bytearray):
+        c_passwd = ctypes.c_ulong(passwd)
+        c_secured = ctypes.c_bool(secured)
+        c_epc_buffer = ctypes.create_string_buffer(init=bytes(epc), size=len(epc))
+        c_epc_buffer_len = ctypes.c_ulong(len(epc))
+        c_bank = ctypes.c_byte(bank.value)
+        c_address = ctypes.c_ulong(address)
+        c_byte_count = ctypes.c_int(byte_count)
+        c_data = ctypes.create_string_buffer(byte_count)
+        res = NurApiBindings.ReadTagByEPC(self._h_api, c_passwd, c_secured, c_epc_buffer, c_epc_buffer_len,
+                                                c_bank, c_address, c_byte_count, c_data)
+        if res==0:
+            data.clear()
+            data += c_data.value
+            logger.debug('Data: 0x' + data.hex())
+        return NUR._log_op_result(op_name='ReadTagByEPC', c_res=res)
+
+    #
+    # NurApiReadTagByEPC(HANDLE
+    # hApi, DWORD
+    # passwd, BOOL
+    # secured,
+    # BYTE * epcBuffer, DWORD
+    # epcBufferLen,
+    # BYTE
+    # rdBank, DWORD
+    # rdAddress, int
+    # rdByteCount, BYTE * rdBuffer);

@@ -92,3 +92,10 @@ class NurApiBindings:
     GetDeviceCaps.argtypes = [ctypes.c_void_p, ctypes.POINTER(_C_NUR_DEVICECAPS),
                                ctypes.c_ulong]
     GetDeviceCaps.restype = ctypes.c_int
+
+    ReadTagByEPC = _nurapi_dll.NurApiReadTagByEPC
+    ReadTagByEPC.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_bool, ctypes.c_char_p,
+                               ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
+    ReadTagByEPC.restype = ctypes.c_int
+
+

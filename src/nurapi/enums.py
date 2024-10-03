@@ -1,11 +1,16 @@
 from enum import Enum, auto
 
-from rain_readers import EasyParamModulation
-
 
 class OperationResult(Enum):
     SUCCESS = True
     ERROR = False
+
+
+class NurBank(Enum):
+    NUR_BANK_PASSWD = 0
+    NUR_BANK_EPC = 1
+    NUR_BANK_TID = 2
+    NUR_BANK_USER = 3
 
 
 class NUR_NOTIFICATION(Enum):
@@ -114,26 +119,3 @@ def get_frequency_from_mode(freq_mode: FREQUENCY_MODE):
         return 256000
     if freq_mode == FREQUENCY_MODE.BLF_320:
         return 320000
-
-
-def get_modulation(rxDecoding):
-    modulation_mode = SETUP_RX_DEC(rxDecoding)
-    if modulation_mode == SETUP_RX_DEC.FM0:
-        return EasyParamModulation.FM0
-    if modulation_mode == SETUP_RX_DEC.MILLER_2:
-        return EasyParamModulation.MILLER_2
-    if modulation_mode == SETUP_RX_DEC.MILLER_4:
-        return EasyParamModulation.MILLER_4
-    if modulation_mode == SETUP_RX_DEC.MILLER_8:
-        return EasyParamModulation.MILLER_8
-
-
-def get_rxDecoding_from_modulation(modulation: EasyParamModulation):
-    if modulation == EasyParamModulation.FM0:
-        return SETUP_RX_DEC.FM0
-    if modulation == EasyParamModulation.MILLER_2:
-        return SETUP_RX_DEC.MILLER_2
-    if modulation == EasyParamModulation.MILLER_4:
-        return SETUP_RX_DEC.MILLER_4
-    if modulation == EasyParamModulation.MILLER_8:
-        return SETUP_RX_DEC.MILLER_8

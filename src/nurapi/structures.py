@@ -6,7 +6,7 @@ from typing import List
 
 from dataclasses_json import dataclass_json
 
-from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ
+from .enums import SETUP_RX_DEC, SETUP_LINK_FREQ
 
 
 class _C_NUR_INVENTORY_RESPONSE(ctypes.Structure):
