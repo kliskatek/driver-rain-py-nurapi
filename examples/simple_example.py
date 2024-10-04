@@ -1,15 +1,16 @@
 import logging
 import time
 
+
 # To use from source
-#from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-#    NurReaderInfo, NurDeviceCaps
-#from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
+from src.nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+    NurReaderInfo, NurDeviceCaps
+from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank, SETUP_RF_PROFILE
 
 # To use from installed package
-from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
-    NurReaderInfo, NurDeviceCaps
-from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
+#from nurapi import NUR, NurTagCount, NurTagData, NurInventoryResponse, NurModuleSetup, NUR_MODULESETUP_FLAGS, \
+#    NurReaderInfo, NurDeviceCaps
+#from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank, SETUP_RX_PROFILE
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -40,21 +41,35 @@ reader.GetDeviceCaps(device_caps=device_caps)
 # Create a setup object
 module_setup = NurModuleSetup()
 # Let API initialize setup with current values
-reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
+reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_REGION,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
 
 # Try a configuration
 module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
 module_setup.rx_decoding = SETUP_RX_DEC.FM0
+desired_tx_level_dbm = 25
+module_setup.tx_level = (device_caps.maxTxdBm - desired_tx_level_dbm) * device_caps.txAttnStep
+module_setup.antenna_mask_ex = 0b00000001  # Antenna 1 (BIT0)
+module_setup.selected_antenna = -1  # Automatic selection
 reader.SetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
 
 reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
 
 # Try a different configuration
-module_setup.link_freq = SETUP_LINK_FREQ.BLF_256
-module_setup.rx_decoding = SETUP_RX_DEC.MILLER_4
+module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
+module_setup.rx_decoding = SETUP_RX_DEC.FM0
 reader.SetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
 
@@ -79,10 +94,11 @@ for idx in range(tag_count.count):
 # Clear tag buffer
 reader.ClearTags()
 
-
 ## INVENTORY STREAM
 # Define callback
 some_epc: bytearray | None = None
+
+
 def callback(inventory_stream_data):
     global some_epc
     # If stream stopped, restart
@@ -113,11 +129,11 @@ reader.StopInventoryStream()
 if some_epc is not None:
     data = bytearray()
     reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
-                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x12, 0x34]))
+                         bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x12, 0x34]))
     reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
                         bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
     reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
-                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x56, 0x78]))
+                         bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x56, 0x78]))
     reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
                         bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
 

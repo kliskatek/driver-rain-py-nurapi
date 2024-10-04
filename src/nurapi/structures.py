@@ -6,7 +6,7 @@ from typing import List
 
 from dataclasses_json import dataclass_json
 
-from .enums import SETUP_RX_DEC, SETUP_LINK_FREQ
+from .enums import SETUP_RX_DEC, SETUP_LINK_FREQ, SETUP_RF_PROFILE, SETUP_REGION
 
 
 class _C_NUR_INVENTORY_RESPONSE(ctypes.Structure):
@@ -128,15 +128,12 @@ class _C_NUR_MODULESETUP(ctypes.Structure):
     def from_py_type(self, py_object):
         if isinstance(py_object.link_freq, SETUP_LINK_FREQ):
             self.linkFreq = py_object.link_freq.value
-        else:
-            self.linkFreq = py_object.link_freq
         if isinstance(py_object.rx_decoding, SETUP_RX_DEC):
             self.rxDecoding = py_object.rx_decoding.value
-        else:
-            self.rxDecoding = py_object.rx_decoding
         self.txLevel = py_object.tx_level
         self.txModulation = py_object.tx_modulation
-        self.regionId = py_object.region_id
+        if isinstance(py_object.region_id, SETUP_REGION):
+            self.regionId = py_object.region_id.value
         self.inventoryQ = py_object.inventory_q
         self.inventorySession = py_object.inventory_session
         self.inventoryRounds = py_object.inventory_rounds
@@ -161,7 +158,8 @@ class _C_NUR_MODULESETUP(ctypes.Structure):
         self.autotune = py_object.autotune
         self.antPowerEx = py_object.ant_power_ex
         self.rxSensitivity = py_object.rx_sensitivity
-        self.rfProfile = py_object.rf_profile
+        if isinstance(py_object.link_freq, SETUP_RF_PROFILE):
+            self.rfProfile = py_object.rf_profile
         self.toSleepTime = py_object.to_sleep_time
 
 
@@ -172,7 +170,7 @@ class NurModuleSetup:
     rx_decoding: SETUP_RX_DEC = None
     tx_level: int = None
     tx_modulation: int = None
-    region_id: int = None
+    region_id: SETUP_REGION = None
     inventory_q: int = None
     inventory_session: int = None
     inventory_rounds: int = None
@@ -206,11 +204,14 @@ class NurModuleSetup:
             self.from_Ctype(c_object)
 
     def from_Ctype(self, c_object: _C_NUR_MODULESETUP):
-        self.link_freq = SETUP_LINK_FREQ(c_object.linkFreq)
+        try:
+            self.link_freq = SETUP_LINK_FREQ(c_object.linkFreq)
+        except:
+            self.link_freq = None
         self.rx_decoding = SETUP_RX_DEC(c_object.rxDecoding)
         self.tx_level = c_object.txLevel
         self.tx_modulation = c_object.txModulation
-        self.region_id = c_object.regionId
+        self.region_id = SETUP_REGION(c_object.regionId)
         self.inventory_q = c_object.inventoryQ
         self.inventory_session = c_object.inventorySession
         self.inventory_rounds = c_object.inventoryRounds

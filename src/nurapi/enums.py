@@ -103,6 +103,33 @@ class FREQUENCY_MODE(Enum):
     BLF_320 = 'BLF_320'
 
 
+class SETUP_RF_PROFILE(Enum):
+    ROBUST = 0
+    NOMINAL = 1
+    HIGH_SPEED = 2
+
+
+class SETUP_REGION(Enum):
+    EU = 0
+    FCC = 1
+    PRC = 2
+    Malaysia = 3
+    Brazil = 4
+    Australia = 5
+    NewZealand = 6
+    Japan_250mW_LBT = 7
+    Japan_500mW_DRM = 8
+    Korea_LBT = 9
+    India = 10
+    Russia = 11
+    Vietnam = 12
+    Singapore = 13
+    Thailand = 14
+    Philippines = 15
+    Morocco = 16
+    Peru = 17
+
+
 def get_frequency_mode(blf):
     if blf == 160000:
         return FREQUENCY_MODE.BLF_160
