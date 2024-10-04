@@ -1,5 +1,5 @@
 import ctypes
-import importlib.resources
+from importlib.resources import files
 import platform
 
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
@@ -8,12 +8,20 @@ from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODUL
 
 class NurApiBindings:
     _nurapi_dll_path = None
+
+    # Detect Source or Package mode
+    top_package = __name__.split('.')[0]
+    if top_package == 'src':
+        nurapi_package = files('src.nurapi')
+    else:
+        nurapi_package = files('nurapi')
+
     if platform.system() == 'Windows':
         if platform.architecture()[0] == '64bit':
-            _nurapi_dll_path = importlib.resources.files('src.nurapi').joinpath('lib').joinpath(
+            _nurapi_dll_path = nurapi_package.joinpath('lib').joinpath(
                 'windows').joinpath('x64').joinpath('NURAPI.dll')
         if platform.architecture()[0] == '32bit':
-            _nurapi_dll_path = importlib.resources.files('src.nurapi').joinpath('lib').joinpath(
+            _nurapi_dll_path = nurapi_package.joinpath('lib').joinpath(
                 'windows').joinpath('x86').joinpath('NURAPI.dll')
 
     if _nurapi_dll_path is None:
@@ -27,6 +35,14 @@ class NurApiBindings:
     SetUsbAutoConnect = _nurapi_dll.NurApiSetUsbAutoConnect
     SetUsbAutoConnect.argtypes = [ctypes.c_void_p, ctypes.c_int]
     SetUsbAutoConnect.restype = ctypes.c_int
+
+    ConnectSerialPort = _nurapi_dll.NurApiConnectSerialPort
+    ConnectSerialPort.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+    ConnectSerialPort.restype = ctypes.c_int
+
+    ConnectSerialPortEx = _nurapi_dll.NurApiConnectSerialPortEx
+    ConnectSerialPortEx.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p, ctypes.c_int]
+    ConnectSerialPortEx.restype = ctypes.c_int
 
     ClearTags = _nurapi_dll.NurApiClearTags
     ClearTags.argtypes = [ctypes.c_void_p]
@@ -82,27 +98,22 @@ class NurApiBindings:
     Disconnect.argtypes = [ctypes.c_void_p]
     Disconnect.restype = ctypes.c_int
 
-
     GetReaderInfo = _nurapi_dll.NurApiGetReaderInfo
     GetReaderInfo.argtypes = [ctypes.c_void_p, ctypes.POINTER(_C_NUR_READERINFO),
-                               ctypes.c_ulong]
+                              ctypes.c_ulong]
     GetReaderInfo.restype = ctypes.c_int
 
     GetDeviceCaps = _nurapi_dll.NurApiGetDeviceCaps
     GetDeviceCaps.argtypes = [ctypes.c_void_p, ctypes.POINTER(_C_NUR_DEVICECAPS),
-                               ctypes.c_ulong]
+                              ctypes.c_ulong]
     GetDeviceCaps.restype = ctypes.c_int
 
     ReadTagByEPC = _nurapi_dll.NurApiReadTagByEPC
     ReadTagByEPC.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_bool, ctypes.c_char_p,
-                               ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
+                             ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
     ReadTagByEPC.restype = ctypes.c_int
 
     WriteTagByEPC = _nurapi_dll.NurApiWriteTagByEPC
     WriteTagByEPC.argtypes = [ctypes.c_void_p, ctypes.c_ulong, ctypes.c_bool, ctypes.c_char_p,
-                               ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
+                              ctypes.c_ulong, ctypes.c_byte, ctypes.c_ulong, ctypes.c_int, ctypes.c_char_p]
     WriteTagByEPC.restype = ctypes.c_int
-
-
-
-

@@ -16,8 +16,14 @@ logging.basicConfig(level=logging.DEBUG)
 ## CONNECT
 # Create driver
 reader = NUR()
+
 # Enable USB autoconnect
-reader.SetUsbAutoConnect(True)
+#reader.SetUsbAutoConnect(True)
+
+# OR Connect to specific serial port
+reader.ConnectSerialPortEx(port_name='COM8')
+#reader.ConnectSerialPort(port_numer=8)
+
 # Check connection status just by checking physical layer status
 reader.IsConnected()
 # Check connection status checking full transport layer

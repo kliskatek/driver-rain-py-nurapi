@@ -27,7 +27,6 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  'ctypes',
   'dataclasses_json'
 ]
 

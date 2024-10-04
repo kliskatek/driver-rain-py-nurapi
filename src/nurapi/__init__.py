@@ -6,7 +6,7 @@ from _ctypes import byref
 
 from .bindings import NurApiBindings
 from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank
-from .helpers import create_c_byte_buffer
+from .helpers import create_c_byte_buffer, create_c_wchar_buffer
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
     NurReaderInfo, NurDeviceCaps, _C_NUR_DEVICECAPS
@@ -182,3 +182,15 @@ class NUR:
         res = NurApiBindings.WriteTagByEPC(self._h_api, c_passwd, c_secured, c_epc_buffer, c_epc_buffer_len,
                                            c_bank, c_address, c_byte_count, c_data)
         return NUR._log_op_result(op_name='WriteTagByEPC', c_res=res)
+
+    def ConnectSerialPort(self, port_numer: int, baud_rate: int = 115200):
+        c_port_numer = ctypes.c_int(port_numer)
+        c_baud_rate = ctypes.c_int(baud_rate)
+        res = NurApiBindings.ConnectSerialPort(self._h_api, c_port_numer, c_baud_rate)
+        return NUR._log_op_result(op_name='ConnectSerialPort', c_res=res)
+
+    def ConnectSerialPortEx(self, port_name: str, baud_rate: int = 115200):
+        c_port_name = create_c_wchar_buffer(port_name)
+        c_baud_rate = ctypes.c_int(baud_rate)
+        res = NurApiBindings.ConnectSerialPortEx(self._h_api, c_port_name, c_baud_rate)
+        return NUR._log_op_result(op_name='ConnectSerialPortEx', c_res=res)
