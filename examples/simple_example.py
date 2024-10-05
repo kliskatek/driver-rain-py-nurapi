@@ -40,13 +40,6 @@ reader.GetDeviceCaps(device_caps=device_caps)
 ## MODULE SETUP
 # Create a setup object
 module_setup = NurModuleSetup()
-# Let API initialize setup with current values
-reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_REGION,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
 
 # Try a configuration
 module_setup.link_freq = SETUP_LINK_FREQ.BLF_160

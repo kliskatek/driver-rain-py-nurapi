@@ -1,8 +1,8 @@
 import ctypes
 import struct
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
-from typing import List
+from typing import List, Any
 
 from dataclasses_json import dataclass_json
 
@@ -166,42 +166,37 @@ class _C_NUR_MODULESETUP(ctypes.Structure):
 @dataclass_json
 @dataclass
 class NurModuleSetup:
-    link_freq: SETUP_LINK_FREQ = None
-    rx_decoding: SETUP_RX_DEC = None
-    tx_level: int = None
-    tx_modulation: int = None
-    region_id: SETUP_REGION = None
-    inventory_q: int = None
-    inventory_session: int = None
-    inventory_rounds: int = None
-    antenna_mask: int = None
-    scan_single_trigger_timeout: int = None
-    inventory_trigger_timeout: int = None
-    selected_antenna: int = None
-    op_flags: int = None
-    inventory_target: int = None
-    inventory_epc_length: int = None
-    read_rssi_filter: _C_NUR_RSSI_FILTER = None
-    write_rssi_filter: _C_NUR_RSSI_FILTER = None
-    inventory_rssi_filter: _C_NUR_RSSI_FILTER = None
-    read_to: int = None
-    write_to: int = None
-    lock_to: int = None
-    kill_to: int = None
-    period_setup: int = None
-    ant_power: List[int] = None
-    power_offset: List[int] = None
-    antenna_mask_ex: int = None
-    autotune: _C_NUR_AUTOTUNE_SETUP = None
-    ant_power_ex: List[int] = None
-    rx_sensitivity: int = None
-    rf_profile: int = None
-    to_sleep_time: int = None
-
-    def __init__(self, c_object: _C_NUR_MODULESETUP = None):
-        super().__init__()
-        if c_object is not None:
-            self.from_Ctype(c_object)
+    link_freq: SETUP_LINK_FREQ = 0
+    rx_decoding: SETUP_RX_DEC = 0
+    tx_level: int = 0
+    tx_modulation: int = 0
+    region_id: SETUP_REGION = 0
+    inventory_q: int = 0
+    inventory_session: int = 0
+    inventory_rounds: int = 0
+    antenna_mask: int = 0
+    scan_single_trigger_timeout: int = 0
+    inventory_trigger_timeout: int = 0
+    selected_antenna: int = 0
+    op_flags: int = 0
+    inventory_target: int = 0
+    inventory_epc_length: int = 0
+    read_rssi_filter: _C_NUR_RSSI_FILTER = _C_NUR_RSSI_FILTER()
+    write_rssi_filter: _C_NUR_RSSI_FILTER = _C_NUR_RSSI_FILTER()
+    inventory_rssi_filter: _C_NUR_RSSI_FILTER = _C_NUR_RSSI_FILTER()
+    read_to: int = 0
+    write_to: int = 0
+    lock_to: int = 0
+    kill_to: int = 0
+    period_setup: int = 0
+    ant_power: List[int] = field(default_factory=ctypes.c_int * 4)
+    power_offset: List[int] = field(default_factory=ctypes.c_int * 4)
+    antenna_mask_ex: int = 0
+    autotune: _C_NUR_AUTOTUNE_SETUP = _C_NUR_AUTOTUNE_SETUP()
+    ant_power_ex: List[int] = field(default_factory=ctypes.c_int * 32)
+    rx_sensitivity: int = 0
+    rf_profile: int = 0
+    to_sleep_time: int = 0
 
     def from_Ctype(self, c_object: _C_NUR_MODULESETUP):
         try:
@@ -273,11 +268,6 @@ class NurReaderInfo:
     num_antennas: int = None
     max_antennas: int = None
 
-    def __init__(self, c_object: _C_NUR_READERINFO = None):
-        super().__init__()
-        if c_object is not None:
-            self.from_Ctype(c_object)
-
     def from_Ctype(self, c_object: _C_NUR_READERINFO):
         self.serial = c_object.serial
         self.alt_serial = c_object.altSerial
@@ -342,11 +332,6 @@ class NurDeviceCaps:
     secChipReleaseVersion: int = None
     res: bytearray = None
 
-    def __init__(self, c_object: _C_NUR_DEVICECAPS = None):
-        super().__init__()
-        if c_object is not None:
-            self.from_Ctype(c_object)
-
     def from_Ctype(self, c_object: _C_NUR_DEVICECAPS):
         self.dwSize = c_object.dwSize
         self.flagSet1 = c_object.flagSet1
@@ -386,10 +371,6 @@ class NurInventoryStreamData:
     collisions: int = None
     Q: int = None
 
-    def __init__(self, c_object: _C_NUR_INVENTORYSTREAM_DATA = None):
-        super().__init__()
-        if c_object is not None:
-            self.from_Ctype(c_object)
 
     def from_Ctype(self, c_object: _C_NUR_INVENTORYSTREAM_DATA):
         self.tags_added = c_object.tagsAdded

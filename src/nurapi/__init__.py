@@ -24,7 +24,8 @@ class NUR:
         def CNotificationCallback(h_api, timestamp, type, data, dataLen):
             logging.debug('NurApi.Notification: ' + str(NUR_NOTIFICATION(type)))
             if NUR_NOTIFICATION(type) == NUR_NOTIFICATION.NUR_NOTIFICATION_INVENTORYSTREAM:
-                inventory_stream_data = NurInventoryStreamData(
+                inventory_stream_data = NurInventoryStreamData()
+                inventory_stream_data.from_Ctype(
                     c_object=ctypes.cast(data, ctypes.POINTER(_C_NUR_INVENTORYSTREAM_DATA)).contents)
                 if self._user_inventory_notification_callback is not None:
                     self._user_inventory_notification_callback(inventory_stream_data)
