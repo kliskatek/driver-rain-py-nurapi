@@ -130,19 +130,130 @@ class SETUP_REGION(Enum):
     Peru = 17
 
 
-def get_frequency_mode(blf):
-    if blf == 160000:
-        return FREQUENCY_MODE.BLF_160
-    if blf == 256000:
-        return FREQUENCY_MODE.BLF_256
-    if blf == 320000:
-        return FREQUENCY_MODE.BLF_320
+class NUR_ERRORCODES(Enum):
+    # Call succeeded
+    NUR_SUCCESS = 0
+    # Invalid command sent to module
+    NUR_ERROR_INVALID_COMMAND = auto()
+    # Invalid packet length sent to module
+    NUR_ERROR_INVALID_LENGTH = auto()
+    # Command parameter(s) out of range
+    NUR_ERROR_PARAMETER_OUT_OF_RANGE = auto()
+    # Data receive timeout
+    NUR_ERROR_RECEIVE_TIMEOUT = auto()
+    # Invalid command parameter(s); Invalid function parameter(s)
+    NUR_ERROR_INVALID_PARAMETER = auto()
+    # Programming failure
+    NUR_ERROR_PROGRAM_FAILED = auto()
+    # Parameter mismatch
+    NUR_ERROR_PARAMETER_MISMATCH = auto()
+    # HW mismatch
+    NUR_ERROR_HW_MISMATCH = auto()
+    NUR_ERROR_RESERVED1 = auto()
+    # Page programming failure
+    NUR_ERROR_PAGE_PROGRAM = auto()
+    # Memory check failed
+    NUR_ERROR_CRC_CHECK = auto()
+    # CRC mismatch in parameter
+    NUR_ERROR_CRC_MISMATCH = auto()
+    # Device not ready or region that is being programmed is not unlocked
+    NUR_ERROR_NOT_READY = auto()
+    # Module application not present
+    NUR_ERROR_APP_NOT_PRESENT = auto()
 
+    # Generic = auto() non-interpreted / unexpected error
+    NUR_ERROR_GENERAL = 0x10
+    # Device wants to have last packet again due to the transfer failure.
+    NUR_ERROR_RESEND_PACKET = auto()
 
-def get_frequency_from_mode(freq_mode: FREQUENCY_MODE):
-    if freq_mode == FREQUENCY_MODE.BLF_160:
-        return 160000
-    if freq_mode == FREQUENCY_MODE.BLF_256:
-        return 256000
-    if freq_mode == FREQUENCY_MODE.BLF_320:
-        return 320000
+    # No tag(s) found
+    NUR_ERROR_NO_TAG = 0x20
+    # Air error
+    NUR_ERROR_RESP_AIR = auto()
+    # G2 select error
+    NUR_ERROR_G2_SELECT = auto()
+    # G2 select data missing
+    NUR_ERROR_MISSING_SELDATA = auto()
+    # G2 access error
+    NUR_ERROR_G2_ACCESS = auto()
+
+    # G2 Read error = auto() unspecified
+    NUR_ERROR_G2_READ = 0x30
+    # G2 Partially successful read
+    NUR_ERROR_G2_RD_PART = auto()
+    # G2 Write error = auto() unspecified
+    NUR_ERROR_G2_WRITE = 0x40
+    # G2 Partially successful write
+    NUR_ERROR_G2_WR_PART = auto()
+    # G2 Tag read responded w/ error
+    NUR_ERROR_G2_TAG_RESP = auto()
+
+    # Special error; Some additional debug data is returned with this error
+    NUR_ERROR_G2_SPECIAL = 0x50
+
+    # HW error
+    NUR_ERROR_READER_HW = 0x60
+    # Antenna too bad
+    NUR_ERROR_BAD_ANTENNA = auto()
+    # Low voltage
+    NUR_ERROR_LOW_VOLTAGE = auto()
+    # Over temperature
+    NUR_ERROR_OVER_TEMP = auto()
+
+    # Invalid handle passed to function
+    NUR_ERROR_INVALID_HANDLE = 0x1000
+    # Transport error
+    NUR_ERROR_TRANSPORT = auto()
+    # Transport not connected
+    NUR_ERROR_TR_NOT_CONNECTED = auto()
+    # Transport timeout
+    NUR_ERROR_TR_TIMEOUT = auto()
+    # Buffer too small
+    NUR_ERROR_BUFFER_TOO_SMALL = auto()
+    # Functionality not supported
+    NUR_ERROR_NOT_SUPPORTED = auto()
+    # Packet contains no payload
+    NUR_ERROR_NO_PAYLOAD = auto()
+    # Packet is invalid
+    NUR_ERROR_INVALID_PACKET = auto()
+    # Packet too long
+    NUR_ERROR_PACKET_TOO_LONG = auto()
+    # Packet Checksum failure
+    NUR_ERROR_PACKET_CS_ERROR = auto()
+    # Data not in WORD boundary
+    NUR_ERROR_NOT_WORD_BOUNDARY = auto()
+    # File not found
+    NUR_ERROR_FILE_NOT_FOUND = auto()
+    # File error; not in NUR format
+    NUR_ERROR_FILE_INVALID = auto()
+    # NUR file and module's MCU architecture mismatch
+    NUR_ERROR_MCU_ARCH = auto()
+
+    # The specified memory location does not exists or the EPC length field is not supported by the tag
+    NUR_ERROR_G2_TAG_MEM_OVERRUN = auto()
+    # The specified memory location is locked and/or permalocked and is either not writeable or not readable
+    NUR_ERROR_G2_TAG_MEM_LOCKED = auto()
+    # The tag has insufficient power to perform the memory-write operation
+    NUR_ERROR_G2_TAG_INSUF_POWER = auto()
+    # The tag does not support error-specific codes
+    NUR_ERROR_G2_TAG_NON_SPECIFIC = auto()
+    # Transport suspended error
+    NUR_ERROR_TR_SUSPENDED = auto()
+    # TCP/IP Server error
+    NUR_ERROR_SERVER = auto()
+    # Device query is busy.
+    NUR_ERROR_QUERY_BUSY = auto()
+    # Tag backscattered error code 0x00: "catch all" error.
+    NUR_ERROR_G2_TAG_OTHER_ERROR = auto()
+    # Tag backscattered error code 0x01: not supported parameters or feature.
+    NUR_ERROR_G2_TAG_NOT_SUPPORTED = auto()
+    # Tag backscattered error code 0x04: insufficient priviledge.
+    NUR_ERROR_G2_TAG_INSUF_PRIVILEDGE = auto()
+    # Tag backscattered error code 0x05: cryptographic suite error.
+    NUR_ERROR_G2_TAG_CRYPTO_SUITE = auto()
+    # Tag backscattered error code 0x06: command was not encapsulated in AuthComm or SecureComm.
+    NUR_ERROR_G2_TAG_NOT_ENCAPSULATED = auto()
+    # Tag backscattered error code 0x07: ResponseBuffer overflowed.
+    NUR_ERROR_G2_TAG_RESPBUFFER_OVF = auto()
+    # Tag backscattered error code 0x10: failure because of security timeout.
+    NUR_ERROR_G2_TAG_SEC_TIMEOUT = auto()

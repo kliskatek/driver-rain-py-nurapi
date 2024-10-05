@@ -5,7 +5,7 @@ from typing import List
 from _ctypes import byref
 
 from .bindings import NurApiBindings
-from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank
+from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank, NUR_ERRORCODES
 from .helpers import create_c_byte_buffer, create_c_wchar_buffer
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
@@ -37,9 +37,9 @@ class NUR:
 
     @staticmethod
     def _check_op_result(op_name: str, c_res: int):
-        op_res = OperationResult(c_res == 0)
-        logging.debug('NurApi.' + str(op_name) + ': ' + str(op_res))
-        if op_res != OperationResult.SUCCESS:
+        op_res = NUR_ERRORCODES(c_res)
+        logging.debug('NurApi.' + str(op_name) + ': ' + str(op_res.name))
+        if op_res != NUR_ERRORCODES.NUR_SUCCESS:
             raise Exception('Operation result for ' + op_name + ': ' + op_res.name)
         return True
 
