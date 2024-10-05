@@ -53,7 +53,7 @@ class NurApiBindings:
     SimpleInventory.restype = ctypes.c_int
 
     FetchTags = _nurapi_dll.NurApiFetchTags
-    FetchTags.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.POINTER(ctypes.c_int)]
+    FetchTags.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.POINTER(ctypes.c_int)]
     FetchTags.restype = ctypes.c_int
 
     GetTagCount = _nurapi_dll.NurApiGetTagCount

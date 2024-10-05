@@ -31,17 +31,14 @@ reader.IsConnected()
 reader.Ping()
 
 ## GET INFO
-reader_info = NurReaderInfo()
-reader.GetReaderInfo(reader_info=reader_info)
+reader_info = reader.GetReaderInfo()
 
-device_caps = NurDeviceCaps()
-reader.GetDeviceCaps(device_caps=device_caps)
+device_caps = reader.GetDeviceCaps()
 
 ## MODULE SETUP
-# Create a setup object
-module_setup = NurModuleSetup()
 
 # Try a configuration
+module_setup = NurModuleSetup()
 module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
 module_setup.rx_decoding = SETUP_RX_DEC.FM0
 desired_tx_level_dbm = 25
@@ -54,11 +51,11 @@ reader.SetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
 
-reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
+module_setup = reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT], module_setup=module_setup)
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT])
 
 # Try a different configuration
 module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
@@ -66,23 +63,20 @@ module_setup.rx_decoding = SETUP_RX_DEC.FM0
 reader.SetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
                                   NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
 
-reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC], module_setup=module_setup)
+module_setup = reader.GetModuleSetup(setupFlags=[NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
+                                  NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC])
 
 ## SIMPLE INVENTORY
-# Create inventory response object
-inventory_response = NurInventoryResponse()
 # Trigger a simple inventory
-reader.SimpleInventory(inventory_response)
+inventory_response = reader.SimpleInventory()
 
-# Fetch read tags to tag buffer including metadata
-tag_count = NurTagCount()
-reader.FetchTags(includeMeta=True, tag_count=tag_count)
+if inventory_response.num_tags_mem > 0:
+    # Fetch read tags to tag buffer including metadata
+    tag_count = reader.FetchTags(include_meta=True)
 
-# Get data of read tags
-for idx in range(tag_count.count):
-    tag_data = NurTagData()
-    reader.GetTagData(idx=idx, tag_data=tag_data)
+    # Get data of read tags
+    for idx in range(tag_count):
+        tag_data = reader.GetTagData(idx=idx)
 
 # Clear tag buffer
 reader.ClearTags()
@@ -99,12 +93,10 @@ def callback(inventory_stream_data):
         reader.StartInventoryStream(rounds=10, q=0, session=0)
 
     # Check number of tags read
-    tag_count = NurTagCount()
-    reader.GetTagCount(tag_count=tag_count)
+    tag_count = reader.GetTagCount()
     # Get data of read tags
-    for idx in range(tag_count.count):
-        tag_data = NurTagData()
-        reader.GetTagData(idx=idx, tag_data=tag_data)
+    for idx in range(tag_count):
+        tag_data = reader.GetTagData(idx=idx)
         some_epc = tag_data.epc
     reader.ClearTags()
 
@@ -120,15 +112,14 @@ reader.StopInventoryStream()
 
 ## READ WRITE OPERATIONS
 if some_epc is not None:
-    data = bytearray()
     reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
                          bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x12, 0x34]))
-    reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
-                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
+    data = reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2)
     reader.WriteTagByEPC(passwd=0, secured=False, epc=some_epc,
                          bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=bytearray([0x56, 0x78]))
-    reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
-                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2, data=data)
+    data = reader.ReadTagByEPC(passwd=0, secured=False, epc=some_epc,
+                        bank=NurBank.NUR_BANK_USER, address=0, byte_count=2)
 
 # Disconnect reader
 reader.Disconnect()
