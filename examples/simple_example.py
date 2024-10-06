@@ -2,11 +2,11 @@ import logging
 import time
 
 # To use from source
-from src.nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS
+from src.nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS, NurInventoryStreamData
 from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
 # To use from installed package
-# from nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS
+# from nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS, NurInventoryStreamData
 # from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
 logging.basicConfig(level=logging.DEBUG)
@@ -44,7 +44,7 @@ module_setup.tx_level = ((device_caps.maxTxdBm - desired_tx_level_dbm) *
 module_setup.antenna_mask_ex = 0b00000001  # Antenna 1 (BIT0)
 module_setup.selected_antenna = -1  # Automatic selection
 reader.SetModuleSetup(
-    setupFlags=[
+    setup_flags=[
         NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
@@ -54,7 +54,7 @@ reader.SetModuleSetup(
     module_setup=module_setup)
 
 module_setup = reader.GetModuleSetup(
-    setupFlags=[
+    setup_flags=[
         NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
@@ -66,14 +66,14 @@ module_setup = reader.GetModuleSetup(
 module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
 module_setup.rx_decoding = SETUP_RX_DEC.FM0
 reader.SetModuleSetup(
-    setupFlags=[
+    setup_flags=[
         NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC
     ],
     module_setup=module_setup)
 
 module_setup = reader.GetModuleSetup(
-    setupFlags=[
+    setup_flags=[
         NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC
     ])
@@ -94,11 +94,11 @@ if inventory_response.num_tags_mem > 0:
 reader.ClearTags()
 
 ## INVENTORY STREAM
-# Define callback
 some_epc: bytearray | None = None
 
 
-def callback(inventory_stream_data):
+# Define callback
+def my_callback(inventory_stream_data: NurInventoryStreamData):
     global some_epc
     # If stream stopped, restart
     if inventory_stream_data.stopped:
@@ -114,8 +114,7 @@ def callback(inventory_stream_data):
 
 
 # Configure the callback
-reader.set_user_inventory_notification_callback(
-    inventory_notification_callback=callback)
+reader.set_notification_callback(notification_callback=my_callback)
 
 # Start inventory stream
 reader.StartInventoryStream(rounds=10, q=0, session=0)

@@ -1,6 +1,6 @@
 import ctypes
 import logging
-from typing import List
+from typing import List, Callable
 
 from _ctypes import byref
 
@@ -19,7 +19,7 @@ class NUR:
     def __init__(self):
         self._h_api = None
         self._Create()
-        self._user_inventory_notification_callback = None
+        self._inventory_notification_callback = None
 
         def CNotificationCallback(h_api, timestamp, type, data, dataLen):
             logging.debug('NurApi.Notification: ' + str(NUR_NOTIFICATION(type)))
@@ -27,8 +27,8 @@ class NUR:
                 inventory_stream_data = NurInventoryStreamData()
                 inventory_stream_data.from_Ctype(
                     c_object=ctypes.cast(data, ctypes.POINTER(_C_NUR_INVENTORYSTREAM_DATA)).contents)
-                if self._user_inventory_notification_callback is not None:
-                    self._user_inventory_notification_callback(inventory_stream_data)
+                if self._inventory_notification_callback is not None:
+                    self._inventory_notification_callback(inventory_stream_data)
 
         self.ctype_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int,
                                                ctypes.c_void_p,
@@ -43,7 +43,7 @@ class NUR:
             raise Exception('Operation result for ' + op_name + ': ' + op_res.name)
         return True
 
-    def _Create(self):
+    def _Create(self) -> bool:
         h_api = NurApiBindings.Create()
         if h_api == -1:
             logger.error('NurApi.Create failed')
@@ -52,14 +52,14 @@ class NUR:
         logging.debug('NurApi.Create succeeded with API handler: ' + str(h_api))
         return True
 
-    def set_user_inventory_notification_callback(self, inventory_notification_callback):
-        self._user_inventory_notification_callback = inventory_notification_callback
+    def set_notification_callback(self, notification_callback: Callable[[NurInventoryStreamData], None]):
+        self._inventory_notification_callback = notification_callback
 
     def SetUsbAutoConnect(self, enable):
         res = NurApiBindings.SetUsbAutoConnect(self._h_api, enable)
         NUR._check_op_result(op_name='SetUsbAutoConnect(' + str(enable) + ')', c_res=res)
 
-    def IsConnected(self):
+    def IsConnected(self) -> bool:
         res = NurApiBindings.IsConnected(self._h_api)
         try:
             NUR._check_op_result(op_name='IsConnected', c_res=res)
@@ -83,7 +83,7 @@ class NUR:
         res = NurApiBindings.ClearTags(self._h_api)
         NUR._check_op_result(op_name='ClearTags', c_res=res)
 
-    def SimpleInventory(self):
+    def SimpleInventory(self) -> NurInventoryResponse:
         c_inventory_response = _C_NUR_INVENTORY_RESPONSE()
         res = NurApiBindings.SimpleInventory(self._h_api, byref(c_inventory_response))
         NUR._check_op_result(op_name='SimpleInventory', c_res=res)
@@ -92,7 +92,7 @@ class NUR:
         logger.debug(inventory_response)
         return inventory_response
 
-    def FetchTags(self, include_meta: bool = True):
+    def FetchTags(self, include_meta: bool = True) -> int:
         c_tags = ctypes.c_int()
         c_include_meta = ctypes.c_bool(include_meta)
         res = NurApiBindings.FetchTags(self._h_api, c_include_meta, byref(c_tags))
@@ -101,7 +101,7 @@ class NUR:
         logger.debug('Fetched tags: ' + str(tags))
         return tags
 
-    def GetTagCount(self):
+    def GetTagCount(self) -> int:
         c_count = ctypes.c_int()
         res = NurApiBindings.GetTagCount(self._h_api, byref(c_count))
         NUR._check_op_result(op_name='GetTagCount', c_res=res)
@@ -109,7 +109,7 @@ class NUR:
         logger.debug('Tag count: ' + str(tag_count))
         return tag_count
 
-    def GetTagData(self, idx):
+    def GetTagData(self, idx) -> NurTagData:
         c_tag_data = _C_NUR_TAG_DATA()
         res = NurApiBindings.GetTagData(self._h_api, idx, byref(c_tag_data))
         NUR._check_op_result(op_name='GetTagData', c_res=res)
@@ -133,10 +133,10 @@ class NUR:
         res = NurApiBindings.SetNotificationCallback(self._h_api, c_notification_callback)
         NUR._check_op_result(op_name='SetNotificationCallback', c_res=res)
 
-    def SetModuleSetup(self, setupFlags: List[NUR_MODULESETUP_FLAGS], module_setup: NurModuleSetup):
+    def SetModuleSetup(self, setup_flags: List[NUR_MODULESETUP_FLAGS], module_setup: NurModuleSetup):
         c_module_setup = _C_NUR_MODULESETUP(py_object=module_setup)
         combinde_flags = 0
-        for setupFlag in setupFlags:
+        for setupFlag in setup_flags:
             combinde_flags += setupFlag.value
         c_setupflags = ctypes.c_ulong(combinde_flags)
         res = NurApiBindings.SetModuleSetup(self._h_api, c_setupflags, byref(c_module_setup),
@@ -144,10 +144,10 @@ class NUR:
         NUR._check_op_result(op_name='SetModuleSetup', c_res=res)
         logger.debug('Set: ' + str(module_setup))
 
-    def GetModuleSetup(self, setupFlags: List[NUR_MODULESETUP_FLAGS]):
+    def GetModuleSetup(self, setup_flags: List[NUR_MODULESETUP_FLAGS]) -> NurModuleSetup:
         c_module_setup = _C_NUR_MODULESETUP()
         combinde_flags = 0
-        for setupFlag in setupFlags:
+        for setupFlag in setup_flags:
             combinde_flags += setupFlag.value
         c_setupflags = ctypes.c_ulong(combinde_flags)
         res = NurApiBindings.GetModuleSetup(self._h_api, c_setupflags, byref(c_module_setup),
@@ -158,16 +158,16 @@ class NUR:
         logger.debug('Get: ' + str(module_setup))
         return module_setup
 
-    def GetReaderInfo(self):
-        c_readerinfo = _C_NUR_READERINFO()
-        res = NurApiBindings.GetReaderInfo(self._h_api, byref(c_readerinfo), ctypes.sizeof(c_readerinfo))
+    def GetReaderInfo(self) -> NurReaderInfo:
+        c_reader_info = _C_NUR_READERINFO()
+        res = NurApiBindings.GetReaderInfo(self._h_api, byref(c_reader_info), ctypes.sizeof(c_reader_info))
         NUR._check_op_result(op_name='GetReaderInfo', c_res=res)
         reader_info = NurReaderInfo()
-        reader_info.from_Ctype(c_object=c_readerinfo)
+        reader_info.from_Ctype(c_object=c_reader_info)
         logger.debug(reader_info)
         return reader_info
 
-    def GetDeviceCaps(self):
+    def GetDeviceCaps(self) -> NurDeviceCaps:
         c_device_caps = _C_NUR_DEVICECAPS()
         res = NurApiBindings.GetDeviceCaps(self._h_api, byref(c_device_caps), ctypes.sizeof(c_device_caps))
         NUR._check_op_result(op_name='GetDeviceCaps', c_res=res)
@@ -177,7 +177,7 @@ class NUR:
         return device_caps
 
     def ReadTagByEPC(self, passwd: int, secured: bool, epc: bytearray, bank: NurBank,
-                     address: int, byte_count: int):
+                     address: int, byte_count: int) -> bytearray:
         c_passwd = ctypes.c_ulong(passwd)
         c_secured = ctypes.c_bool(secured)
         c_epc_buffer = ctypes.create_string_buffer(init=bytes(epc), size=len(epc))
@@ -198,7 +198,7 @@ class NUR:
             return None
 
     def WriteTagByEPC(self, passwd: int, secured: bool, epc: bytearray, bank: NurBank,
-                      address: int, byte_count: int, data: bytearray):
+                      address: int, byte_count: int, data: bytearray) -> bool:
         c_passwd = ctypes.c_ulong(passwd)
         c_secured = ctypes.c_bool(secured)
         c_epc_buffer = ctypes.create_string_buffer(init=bytes(epc), size=len(epc))
