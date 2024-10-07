@@ -2,8 +2,8 @@ import ctypes
 from importlib.resources import files
 import platform
 
-from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
-    _C_NUR_READERINFO, _C_NUR_DEVICECAPS
+from .structures import (_C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP,
+                         _C_NUR_READERINFO, _C_NUR_DEVICECAPS)
 
 
 class NurApiBindings:

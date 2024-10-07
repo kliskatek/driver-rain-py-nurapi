@@ -29,7 +29,6 @@ reader.Ping()
 
 ## GET INFO
 reader_info = reader.GetReaderInfo()
-
 device_caps = reader.GetDeviceCaps()
 
 ## MODULE SETUP

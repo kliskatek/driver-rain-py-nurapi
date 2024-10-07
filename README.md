@@ -3,6 +3,8 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/nurapi.svg)](https://pypi.org/project/nurapi)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/nurapi.svg)](https://pypi.org/project/nurapi)
 ![OS](https://img.shields.io/badge/os-windows-blue)
+-----
+*Python driver for NordicID UHF RFID readers wrapping NurApi*
 ## Table of Contents
 
 - [Installation](#installation)
@@ -136,6 +138,11 @@ time.sleep(1)
 # Stop inventory stream
 reader.StopInventoryStream()
 ```
+Sample report:
+
+`
+NurTagData(timestamp=11, rssi=-51, scaled_rssi=93, freq=866.9, pc=bytearray(b'4\x00'), channel=2, antenna_id=0, epc_len=12, epc=bytearray(b'Q\x10\x12\x03(\x000\x00\x00\x00V\x04'))
+`
 ### Execute Read/Write operations
 ```python
 reader.WriteTagByEPC(
