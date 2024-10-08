@@ -16,14 +16,14 @@ logging.basicConfig(level=logging.DEBUG)
 reader = NUR()
 
 # Enable full log for development
-reader.SetLogLevel(NUR_LOG.NUR_LOG_ALL)
+# reader.SetLogLevel(NUR_LOG.NUR_LOG_ALL)
 
 # Enable USB autoconnect
 # reader.SetUsbAutoConnect(True) # Only for windows
 
 # OR Connect to specific serial port
-reader.ConnectSerialPortEx(port_name='COM8')  # windows
-#reader.ConnectSerialPortEx(port_name='/dev/ttyACM0')  # linux
+# reader.ConnectSerialPortEx(port_name='COM8')  # windows
+reader.ConnectSerialPortEx(port_name='/dev/ttyACM0')  # linux
 
 # Check connection status just by checking physical layer status
 reader.IsConnected()

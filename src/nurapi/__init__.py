@@ -1,12 +1,13 @@
 import ctypes
 import logging
+import platform
 from typing import List, Callable
 
 from _ctypes import byref
 
 from .bindings import NurApiBindings
 from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank, NUR_ERRORCODES, NUR_LOG
-from .helpers import create_c_byte_buffer, create_c_wchar_buffer
+from .helpers import create_c_wchar_buffer
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
     NurReaderInfo, NurDeviceCaps, _C_NUR_DEVICECAPS
@@ -30,7 +31,11 @@ class NUR:
                 if self._inventory_notification_callback is not None:
                     self._inventory_notification_callback(inventory_stream_data)
             if NUR_NOTIFICATION(type) == NUR_NOTIFICATION.NUR_NOTIFICATION_LOG:
-                log_data = ctypes.cast(data, ctypes.c_wchar_p).value
+
+                if platform.system() == 'Windows':
+                    log_data = ctypes.cast(data, ctypes.c_wchar_p).value
+                elif platform.system() == 'Linux':
+                    log_data = ctypes.cast(data, ctypes.c_char_p).value
                 logging.debug('NurApi.Notification: ' + str(log_data))
 
         self.ctype_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int,
@@ -230,6 +235,7 @@ class NUR:
         NUR._check_op_result(op_name='ConnectSerialPort', c_res=res)
 
     def ConnectSerialPortEx(self, port_name: str, baud_rate: int = 115200):
+        #c_port_name = create_c_wchar_buffer(port_name)
         c_port_name = create_c_wchar_buffer(port_name)
         c_baud_rate = ctypes.c_int(baud_rate)
         res = NurApiBindings.ConnectSerialPortEx(self._h_api, c_port_name, c_baud_rate)
