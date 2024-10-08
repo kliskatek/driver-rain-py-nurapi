@@ -23,6 +23,13 @@ class NurApiBindings:
         if platform.architecture()[0] == '32bit':
             _nurapi_dll_path = nurapi_package.joinpath('lib').joinpath(
                 'windows').joinpath('x86').joinpath('NURAPI.dll')
+    elif platform.system() == 'Linux':
+        if platform.architecture()[0] == '64bit':
+            _nurapi_dll_path = nurapi_package.joinpath('lib').joinpath(
+                'linux').joinpath('libNurApix64.so')
+        if platform.architecture()[0] == '32bit':
+            _nurapi_dll_path = nurapi_package.joinpath('lib').joinpath(
+                'linux').joinpath('libNurApix86.so')
 
     if _nurapi_dll_path is None:
         raise Exception('OS/Platform not supported')
