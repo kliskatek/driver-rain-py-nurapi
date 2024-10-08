@@ -130,7 +130,16 @@ class SETUP_REGION(Enum):
     Peru = 17
 
 
+class NUR_LOG(Enum):
+    NUR_LOG_VERBOSE = 0b0001
+    NUR_LOG_ERROR = 0b0010
+    NUR_LOG_USER = 0b0100
+    NUR_LOG_DATA = 0b1000
+    NUR_LOG_ALL = 0b1111
+
+
 class NUR_ERRORCODES(Enum):
+    UNKNOWN_ERROR = -1
     # Call succeeded
     NUR_SUCCESS = 0
     # Invalid command sent to module

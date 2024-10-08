@@ -5,7 +5,7 @@ from typing import List, Callable
 from _ctypes import byref
 
 from .bindings import NurApiBindings
-from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank, NUR_ERRORCODES
+from .enums import NUR_NOTIFICATION, NUR_MODULESETUP_FLAGS, OperationResult, NurBank, NUR_ERRORCODES, NUR_LOG
 from .helpers import create_c_byte_buffer, create_c_wchar_buffer
 from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODULESETUP, _C_NUR_INVENTORYSTREAM_DATA, \
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
@@ -29,6 +29,9 @@ class NUR:
                     c_object=ctypes.cast(data, ctypes.POINTER(_C_NUR_INVENTORYSTREAM_DATA)).contents)
                 if self._inventory_notification_callback is not None:
                     self._inventory_notification_callback(inventory_stream_data)
+            if NUR_NOTIFICATION(type) == NUR_NOTIFICATION.NUR_NOTIFICATION_LOG:
+                log_data = ctypes.cast(data, ctypes.c_wchar_p).value
+                logging.debug('NurApi.Notification: ' + str(log_data))
 
         self.ctype_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int,
                                                ctypes.c_void_p,
@@ -37,7 +40,10 @@ class NUR:
 
     @staticmethod
     def _check_op_result(op_name: str, c_res: int):
-        op_res = NUR_ERRORCODES(c_res)
+        try:
+            op_res = NUR_ERRORCODES(c_res)
+        except Exception:
+            op_res = NUR_ERRORCODES.UNKNOWN_ERROR
         logging.debug('NurApi.' + str(op_name) + ': ' + str(op_res.name))
         if op_res != NUR_ERRORCODES.NUR_SUCCESS:
             raise Exception('Operation result for ' + op_name + ': ' + op_res.name)
@@ -228,3 +234,11 @@ class NUR:
         c_baud_rate = ctypes.c_int(baud_rate)
         res = NurApiBindings.ConnectSerialPortEx(self._h_api, c_port_name, c_baud_rate)
         NUR._check_op_result(op_name='ConnectSerialPortEx', c_res=res)
+
+    def SetLogLevel(self, log_mode: NUR_LOG):
+        try:
+            c_log_mode = ctypes.c_int(log_mode.value)
+            res = NurApiBindings.SetLogLevel(self._h_api, c_log_mode)
+            NUR._check_op_result(op_name='SetLogLevel', c_res=res)
+        except Exception:
+            pass

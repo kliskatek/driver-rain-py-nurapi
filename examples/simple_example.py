@@ -3,7 +3,7 @@ import time
 
 # To use from source
 from src.nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS, NurInventoryStreamData
-from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
+from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank, NUR_LOG
 
 # To use from installed package
 # from nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS, NurInventoryStreamData
@@ -15,12 +15,15 @@ logging.basicConfig(level=logging.DEBUG)
 # Create driver
 reader = NUR()
 
+# Enable full log for development
+reader.SetLogLevel(NUR_LOG.NUR_LOG_ALL)
+
 # Enable USB autoconnect
-#reader.SetUsbAutoConnect(True)
+# reader.SetUsbAutoConnect(True) # Only for windows
 
 # OR Connect to specific serial port
-reader.ConnectSerialPortEx(port_name='COM8')
-#reader.ConnectSerialPort(port_numer=8)
+reader.ConnectSerialPortEx(port_name='COM8')  # windows
+#reader.ConnectSerialPortEx(port_name='/dev/ttyACM0')  # linux
 
 # Check connection status just by checking physical layer status
 reader.IsConnected()
