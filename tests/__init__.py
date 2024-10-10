@@ -1,3 +1,5 @@
-# SPDX-FileCopyrightText: 2024-present U.N. Owen <void@some.where>
-#
-# SPDX-License-Identifier: MIT
+# Create driver
+from src.nurapi import NUR
+
+reader = NUR()
+reader.ConnectSerialPortEx(port_name='COM8')
