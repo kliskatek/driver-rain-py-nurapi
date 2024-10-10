@@ -12,7 +12,7 @@ from .structures import _C_NUR_INVENTORY_RESPONSE, _C_NUR_TAG_DATA, _C_NUR_MODUL
     NurTagCount, NurTagData, NurInventoryStreamData, NurInventoryResponse, NurModuleSetup, _C_NUR_READERINFO, \
     NurReaderInfo, NurDeviceCaps, _C_NUR_DEVICECAPS
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('nurapi')
 
 
 class NUR:
@@ -23,7 +23,7 @@ class NUR:
         self._inventory_notification_callback = None
 
         def CNotificationCallback(h_api, timestamp, type, data, dataLen):
-            logging.debug('NurApi.Notification: ' + str(NUR_NOTIFICATION(type)))
+            logger.debug('Notification: ' + str(NUR_NOTIFICATION(type)))
             if NUR_NOTIFICATION(type) == NUR_NOTIFICATION.NUR_NOTIFICATION_INVENTORYSTREAM:
                 inventory_stream_data = NurInventoryStreamData()
                 inventory_stream_data.from_Ctype(
@@ -36,7 +36,7 @@ class NUR:
                     log_data = ctypes.cast(data, ctypes.c_wchar_p).value
                 elif platform.system() == 'Linux':
                     log_data = ctypes.cast(data, ctypes.c_char_p).value
-                logging.debug('NurApi.Notification: ' + str(log_data))
+                logger.debug('Notification: ' + str(log_data))
 
         self.ctype_callback = ctypes.CFUNCTYPE(None, ctypes.c_void_p, ctypes.c_ulong, ctypes.c_int,
                                                ctypes.c_void_p,
@@ -49,7 +49,7 @@ class NUR:
             op_res = NUR_ERRORCODES(c_res)
         except Exception:
             op_res = NUR_ERRORCODES.UNKNOWN_ERROR
-        logging.debug('NurApi.' + str(op_name) + ': ' + str(op_res.name))
+        logger.debug(str(op_name) + ': ' + str(op_res.name))
         if op_res != NUR_ERRORCODES.NUR_SUCCESS:
             raise Exception('Operation result for ' + op_name + ': ' + op_res.name)
         return True
@@ -57,10 +57,10 @@ class NUR:
     def _Create(self) -> bool:
         h_api = NurApiBindings.Create()
         if h_api == -1:
-            logger.error('NurApi.Create failed')
+            logger.error('Create failed')
             return False
         self._h_api = h_api
-        logging.debug('NurApi.Create succeeded with API handler: ' + str(h_api))
+        logger.debug('Create succeeded with API handler: ' + str(h_api))
         return True
 
     def set_notification_callback(self, notification_callback: Callable[[NurInventoryStreamData], None]):
@@ -126,7 +126,7 @@ class NUR:
         NUR._check_op_result(op_name='GetTagData', c_res=res)
         tag_data = NurTagData()
         tag_data.from_Ctype(c_tag_data)
-        logger.debug(tag_data)
+        logger.info(tag_data)
         return tag_data
 
     def StartInventoryStream(self, rounds: int, q: int, session: int):
@@ -153,7 +153,7 @@ class NUR:
         res = NurApiBindings.SetModuleSetup(self._h_api, c_setupflags, byref(c_module_setup),
                                             ctypes.sizeof(c_module_setup))
         NUR._check_op_result(op_name='SetModuleSetup', c_res=res)
-        logger.debug('Set: ' + str(module_setup))
+        logger.info('SetModuleSetup -> ' + str(module_setup))
 
     def GetModuleSetup(self, setup_flags: List[NUR_MODULESETUP_FLAGS]) -> NurModuleSetup:
         c_module_setup = _C_NUR_MODULESETUP()
@@ -166,7 +166,7 @@ class NUR:
         NUR._check_op_result(op_name='GetModuleSetup', c_res=res)
         module_setup = NurModuleSetup()
         module_setup.from_Ctype(c_object=c_module_setup)
-        logger.debug('Get: ' + str(module_setup))
+        logger.info('GetModuleSetup -> ' + str(module_setup))
         return module_setup
 
     def GetReaderInfo(self) -> NurReaderInfo:
@@ -175,7 +175,8 @@ class NUR:
         NUR._check_op_result(op_name='GetReaderInfo', c_res=res)
         reader_info = NurReaderInfo()
         reader_info.from_Ctype(c_object=c_reader_info)
-        logger.debug(reader_info)
+        logger.info(reader_info)
+        logger.debug('info')
         return reader_info
 
     def GetDeviceCaps(self) -> NurDeviceCaps:
@@ -184,7 +185,7 @@ class NUR:
         NUR._check_op_result(op_name='GetDeviceCaps', c_res=res)
         device_caps = NurDeviceCaps()
         device_caps.from_Ctype(c_object=c_device_caps)
-        logger.debug(device_caps)
+        logger.info(device_caps)
         return device_caps
 
     def ReadTagByEPC(self, passwd: int, secured: bool, epc: bytearray, bank: NurBank,
@@ -202,7 +203,7 @@ class NUR:
         try:
             NUR._check_op_result(op_name='ReadTagByEPC', c_res=res)
             data = bytearray(c_data.value)
-            logger.debug('Read: 0x' + str(data.hex()) + '@' + bank.name + '.' + str(address))
+            logger.info('Read: 0x' + str(data.hex()) + '@' + bank.name + '.' + str(address))
             return data
         except Exception as e:
             logger.warning(e)
@@ -222,7 +223,7 @@ class NUR:
                                            c_bank, c_address, c_byte_count, c_data)
         try:
             NUR._check_op_result(op_name='WriteTagByEPC', c_res=res)
-            logger.debug('Write: 0x' + str(data.hex()) + '@' + bank.name + '.' + str(address))
+            logger.info('Write: 0x' + str(data.hex()) + '@' + bank.name + '.' + str(address))
             return True
         except Exception as e:
             logger.warning(e)

@@ -9,7 +9,14 @@ from src.nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank, NUR_LOG
 # from nurapi import NUR, NurModuleSetup, NUR_MODULESETUP_FLAGS, NurInventoryStreamData
 # from nurapi.enums import SETUP_RX_DEC, SETUP_LINK_FREQ, NurBank
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig()
+
+nurapi_logger = logging.getLogger('nurapi')
+nurapi_logger.setLevel(logging.INFO)
+
+
+example_logger = logging.getLogger('example')
+example_logger.setLevel(level=logging.DEBUG)
 
 ## CONNECT
 # Create driver
@@ -22,8 +29,8 @@ reader = NUR()
 # reader.SetUsbAutoConnect(True) # Only for windows
 
 # OR Connect to specific serial port
-# reader.ConnectSerialPortEx(port_name='COM8')  # windows
-reader.ConnectSerialPortEx(port_name='/dev/ttyACM0')  # linux
+reader.ConnectSerialPortEx(port_name='COM8')  # windows
+#reader.ConnectSerialPortEx(port_name='/dev/ttyACM0')  # linux
 
 # Check connection status just by checking physical layer status
 reader.IsConnected()
@@ -36,10 +43,10 @@ device_caps = reader.GetDeviceCaps()
 
 ## MODULE SETUP
 
-# Try a configuration
+# Set a configuration
 module_setup = NurModuleSetup()
-module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
-module_setup.rx_decoding = SETUP_RX_DEC.FM0
+module_setup.link_freq = SETUP_LINK_FREQ.BLF_256
+module_setup.rx_decoding = SETUP_RX_DEC.MILLER_4
 desired_tx_level_dbm = 25
 module_setup.tx_level = ((device_caps.maxTxdBm - desired_tx_level_dbm) *
                          device_caps.txAttnStep)
@@ -62,22 +69,6 @@ module_setup = reader.GetModuleSetup(
         NUR_MODULESETUP_FLAGS.NUR_SETUP_TXLEVEL,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_ANTMASKEX,
         NUR_MODULESETUP_FLAGS.NUR_SETUP_SELECTEDANT
-    ])
-
-# Try a different configuration
-module_setup.link_freq = SETUP_LINK_FREQ.BLF_160
-module_setup.rx_decoding = SETUP_RX_DEC.FM0
-reader.SetModuleSetup(
-    setup_flags=[
-        NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-        NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC
-    ],
-    module_setup=module_setup)
-
-module_setup = reader.GetModuleSetup(
-    setup_flags=[
-        NUR_MODULESETUP_FLAGS.NUR_SETUP_LINKFREQ,
-        NUR_MODULESETUP_FLAGS.NUR_SETUP_RXDEC
     ])
 
 ## SIMPLE INVENTORY
@@ -111,6 +102,7 @@ def my_callback(inventory_stream_data: NurInventoryStreamData):
     # Get data of read tags
     for idx in range(tag_count):
         tag_data = reader.GetTagData(idx=idx)
+        logging.info(tag_data.epc)
         some_epc = tag_data.epc
     reader.ClearTags()
 
@@ -120,7 +112,9 @@ reader.set_notification_callback(notification_callback=my_callback)
 
 # Start inventory stream
 reader.StartInventoryStream(rounds=10, q=0, session=0)
+
 time.sleep(1)
+
 # Stop inventory stream
 reader.StopInventoryStream()
 
