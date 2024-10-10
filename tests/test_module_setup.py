@@ -2,9 +2,6 @@ from src.nurapi import NurModuleSetup
 from src.nurapi.enums import SETUP_LINK_FREQ, SETUP_RX_DEC, NUR_MODULESETUP_FLAGS
 from tests import reader
 
-device_caps = reader.GetDeviceCaps()
-reader_info = reader.GetReaderInfo()
-
 
 def test_communication_mode():
     for link_freq in SETUP_LINK_FREQ:
@@ -29,6 +26,7 @@ def test_communication_mode():
 
 
 def test_antenna():
+    reader_info = reader.GetReaderInfo()
     for antenna_idx in range(reader_info.num_antennas):
         module_setup = NurModuleSetup()
         module_setup.antenna_mask_ex = 0b1 << antenna_idx
@@ -50,6 +48,7 @@ def test_antenna():
 
 
 def test_power():
+    device_caps = reader.GetDeviceCaps()
     tx_options = range(device_caps.maxTxdBm - (device_caps.txAttnStep - 1) * device_caps.txSteps,
                        device_caps.maxTxdBm,
                        device_caps.txAttnStep)
