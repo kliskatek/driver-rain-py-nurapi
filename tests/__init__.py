@@ -1,6 +1,7 @@
 # Create driver
-from src.nurapi import NUR, NurDeviceCaps, NurReaderInfo
+from src.nurapi import NUR
 
+reader_port_number = 8
 reader_port_name = 'COM8'
 present_tag_epc = bytearray(b'Q\x10\x12\x03(\x000\x00\x00\x00V\x04')
 
